@@ -1,4 +1,8 @@
 <template>
+  <base-dialog :show="!!error" title="An error occurred!" @close="handleError">
+    <p>{{ error }}</p>
+  </base-dialog>
+
   <section>
     <coach-filter @change-filter="setFilters"></coach-filter>
   </section>
@@ -49,6 +53,7 @@ export default {
         career: true,
       },
       isLoading: false,
+      error: null,
     };
   },
   computed: {
@@ -80,8 +85,16 @@ export default {
     },
     async loadCoaches() {
       this.isLoading = true;
-      await this.$store.dispatch("coaches/loadCoaches");
+      try {
+        await this.$store.dispatch("coaches/loadCoaches");
+      } catch (err) {
+        this.error = err.message || "something went wrong!";
+      }
+
       this.isLoading = false;
+    },
+    handleError() {
+      this.error = null;
     },
   },
   created() {
