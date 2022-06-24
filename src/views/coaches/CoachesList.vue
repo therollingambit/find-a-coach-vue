@@ -1,41 +1,47 @@
 <template>
-  <base-dialog :show="!!error" title="An error occurred!" @close="handleError">
-    <p>{{ error }}</p>
-  </base-dialog>
+  <div>
+    <base-dialog
+      :show="!!error"
+      title="An error occurred!"
+      @close="handleError"
+    >
+      <p>{{ error }}</p>
+    </base-dialog>
 
-  <section>
-    <coach-filter @change-filter="setFilters"></coach-filter>
-  </section>
+    <section>
+      <coach-filter @change-filter="setFilters"></coach-filter>
+    </section>
 
-  <section>
-    <base-card>
-      <div class="controls">
-        <base-button mode="outline" @click="loadCoaches(true)">
-          Refresh
-        </base-button>
-        <base-button v-if="!isCoach && !isLoading" link to="/register"
-          >Register as a Coach</base-button
-        >
-      </div>
+    <section>
+      <base-card>
+        <div class="controls">
+          <base-button mode="outline" @click="loadCoaches(true)">
+            Refresh
+          </base-button>
+          <base-button v-if="!isCoach && !isLoading" link to="/register"
+            >Register as a Coach</base-button
+          >
+        </div>
 
-      <div v-if="isLoading">
-        <base-spinner></base-spinner>
-      </div>
+        <div v-if="isLoading">
+          <base-spinner></base-spinner>
+        </div>
 
-      <ul v-else-if="hasCoaches">
-        <coach-item
-          v-for="coach in filteredCoaches"
-          :key="coach.id"
-          :id="coach.id"
-          :first-name="coach.firstName"
-          :last-name="coach.lastName"
-          :areas="coach.areas"
-          :rate="coach.hourlyRate"
-        ></coach-item>
-      </ul>
-      <h3 v-else>No coaches found.</h3>
-    </base-card>
-  </section>
+        <ul v-else-if="hasCoaches">
+          <coach-item
+            v-for="coach in filteredCoaches"
+            :key="coach.id"
+            :id="coach.id"
+            :first-name="coach.firstName"
+            :last-name="coach.lastName"
+            :areas="coach.areas"
+            :rate="coach.hourlyRate"
+          ></coach-item>
+        </ul>
+        <h3 v-else>No coaches found.</h3>
+      </base-card>
+    </section>
+  </div>
 </template>
 
 <script>
@@ -88,7 +94,9 @@ export default {
     async loadCoaches(refresh = false) {
       this.isLoading = true;
       try {
-        await this.$store.dispatch("coaches/loadCoaches", {forceRefresh: refresh});
+        await this.$store.dispatch("coaches/loadCoaches", {
+          forceRefresh: refresh,
+        });
       } catch (err) {
         this.error = err.message || "something went wrong!";
       }
