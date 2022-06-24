@@ -36,7 +36,7 @@ export default {
       throw error;
     }
 
-    const requests = []
+    const requests = [];
     for (const key in resData) {
       const request = {
         id: key,

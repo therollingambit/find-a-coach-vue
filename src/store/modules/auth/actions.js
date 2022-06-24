@@ -70,8 +70,8 @@ export default {
 
     if (token && userId) {
       context.commit("setUser", {
-        token,
-        userId,
+        token: token,
+        userId: userId,
       });
     }
   },
