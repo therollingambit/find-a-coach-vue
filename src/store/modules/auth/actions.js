@@ -1,4 +1,5 @@
 const api_key = import.meta.env.VITE_FIREBASE_API_KEY;
+let timer;
 
 export default {
   login(context, payload) {
@@ -37,32 +38,57 @@ export default {
       throw error;
     }
 
+    const expiresIn = +resData.expiresIn * 1000;
+    const expirationDate = new Date().getTime() + expiresIn;
+
     localStorage.setItem("token", resData.idToken);
     localStorage.setItem("userId", resData.localId);
+    localStorage.setItem("tokenExpiration", expirationDate);
+
+    timer = setTimeout(() => {
+      context.dispatch("autoLogout");
+    }, expiresIn);
 
     context.commit("setUser", {
       token: resData.idToken,
       userId: resData.localId,
-      tokenExpiration: resData.expiresIn,
     });
   },
   autoLogin(context) {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
+    const tokenExpiration = localStorage.getItem("tokenExpiration");
+
+    const expiresIn = +tokenExpiration - new Date().getTime();
+    if (expiresIn < 0) {
+      return;
+    }
+
+    timer = setTimeout(() => {
+      context.dispatch("autoLogout");
+    }, expiresIn);
 
     if (token && userId) {
       context.commit("setUser", {
         token,
         userId,
-        tokenExpiration: null,
       });
     }
   },
   logout(context) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("tokenExpiration");
+
+    clearTimeout(timer);
+
     context.commit("setUser", {
       token: null,
       userId: null,
-      tokenExpiration: null,
     });
+  },
+  autoLogout(context) {
+    context.dispatch("logout");
+    context.commit("setAutoLogout");
   },
 };
