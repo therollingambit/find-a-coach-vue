@@ -28,12 +28,17 @@ export default {
       id: userId,
     });
   },
-  async loadCoaches(context, _) {
+  async loadCoaches(context, payload) {
+    if (!payload.forceRefresh && !context.getters.shouldUpdate) {
+      return;
+    }
+
     const res = await fetch(`${uri}/coaches.json`);
     const resData = await res.json();
 
     if (!res.ok) {
-      // error
+      const error = new Error(resData.message || "Failed to fetch!");
+      throw error;
     }
 
     const coaches = [];
@@ -51,5 +56,6 @@ export default {
     }
 
     context.commit("setCoaches", coaches);
+    context.commit("setFetchTimestamp");
   },
 };
